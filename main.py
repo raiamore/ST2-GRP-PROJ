@@ -12,38 +12,62 @@ from modules import dp_visualizer
 
 pygame.init()
 
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 800, 700
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("DSA Explorer")
+
 font = pygame.font.SysFont(None, 48)
+
 clock = pygame.time.Clock()
 
+
 def draw_menu():
+
     screen.fill((200, 200, 250))
 
     title = font.render("DSA Explorer", True, (0, 0, 0))
-    screen.blit(title, (260, 80))
+    title_rect = title.get_rect(center=(WIDTH // 2, 55))
+
+    screen.blit(title, title_rect)
 
     buttons = {
-        "Stack": pygame.Rect(300, 180, 200, 50),
-        "Queue": pygame.Rect(300, 250, 200, 50),
-        "Linked List": pygame.Rect(300, 320, 200, 50),
-        "BST": pygame.Rect(300, 390, 200, 50),
-        "Sorting": pygame.Rect(300, 460, 200, 50),
 
-        "Heap": pygame.Rect(550, 180, 200, 50),
-        "Puzzles": pygame.Rect(550, 250, 200, 50),
-        "Graphs": pygame.Rect(550, 320, 200, 50),
-        "DP": pygame.Rect(550, 390, 200, 50),
+        # LEFT COLUMN
+
+        "Stack": pygame.Rect(100, 200, 260, 55),
+
+        "Queue": pygame.Rect(100, 270, 260, 55),
+
+        "Linked List": pygame.Rect(100, 340, 260, 55),
+
+        "BST": pygame.Rect(100, 410, 260, 55),
+
+        # RIGHT COLUMN
+        "Heap": pygame.Rect(440, 130, 260, 55),
+
+        "Puzzles": pygame.Rect(440, 200, 260, 55),
+
+        "Graphs": pygame.Rect(440, 270, 260, 55),
+
+        "DP": pygame.Rect(440, 340, 260, 55),
+
+        "Sorting": pygame.Rect(440, 410, 260, 55),
     }
 
     for name, rect in buttons.items():
-        pygame.draw.rect(screen, (150, 150, 250), rect)
+
+        pygame.draw.rect(screen, (150, 150, 250), rect, border_radius=8)
+
         text = font.render(name, True, (0, 0, 0))
-        screen.blit(text, (rect.x + 20, rect.y + 10))
+
+        text_rect = text.get_rect(center=rect.center)
+
+        screen.blit(text, text_rect)
 
     pygame.display.flip()
-    return buttons
 
+    return buttons
 
 running = True
 
@@ -57,6 +81,7 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+
             pos = event.pos
 
             if buttons["Stack"].collidepoint(pos):
@@ -74,6 +99,7 @@ while running:
             elif buttons["Sorting"].collidepoint(pos):
                 sorting_visualizer.run(screen)
 
+
             elif buttons["Heap"].collidepoint(pos):
                 heap_visualizer.run(screen)
 
@@ -87,5 +113,4 @@ while running:
                 dp_visualizer.run(screen)
 
     clock.tick(30)
-
 pygame.quit()
