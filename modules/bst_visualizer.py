@@ -4,11 +4,10 @@ def run(screen):
 
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 28)
+    big_font = pygame.font.SysFont(None, 34)
 
     WIDTH, HEIGHT = screen.get_size()
-
     NODE_RADIUS = 20
-
 
 
     class Node:
@@ -16,6 +15,7 @@ def run(screen):
             self.value = value
             self.left = None
             self.right = None
+
 
     class BST:
         def __init__(self):
@@ -33,48 +33,13 @@ def run(screen):
 
             self.root = _insert(self.root, value)
 
-        def inorder(self):
-            res = []
-
-            def dfs(node):
-                if node:
-                    dfs(node.left)
-                    res.append(node)
-                    dfs(node.right)
-
-            dfs(self.root)
-            return res
-
-        def preorder(self):
-            res = []
-
-            def dfs(node):
-                if node:
-                    res.append(node)
-                    dfs(node.left)
-                    dfs(node.right)
-
-            dfs(self.root)
-            return res
-
-        def postorder(self):
-            res = []
-
-            def dfs(node):
-                if node:
-                    dfs(node.left)
-                    dfs(node.right)
-                    res.append(node)
-
-            dfs(self.root)
-            return res
-
         def search(self, value):
             path = []
             node = self.root
 
             while node:
                 path.append(node)
+
                 if value == node.value:
                     break
                 elif value < node.value:
@@ -83,29 +48,6 @@ def run(screen):
                     node = node.right
 
             return path
-
-        def delete(self, node, value):
-            if not node:
-                return None
-
-            if value < node.value:
-                node.left = self.delete(node.left, value)
-            elif value > node.value:
-                node.right = self.delete(node.right, value)
-            else:
-                if not node.left:
-                    return node.right
-                if not node.right:
-                    return node.left
-
-                temp = node.right
-                while temp.left:
-                    temp = temp.left
-
-                node.value = temp.value
-                node.right = self.delete(node.right, temp.value)
-
-            return node
 
 
     def draw_tree(node, x, y, spacing, highlight_set):
@@ -129,59 +71,82 @@ def run(screen):
             draw_tree(node.right, x + spacing, y + 80, spacing // 2, highlight_set)
 
 
-
     bst = BST()
-    values = [50, 30, 70, 20, 40, 60, 80]
-
-    for v in values:
+    for v in [50, 30, 70, 20, 40, 60, 80]:
         bst.insert(v)
 
-    traversal = []
-    index = 0
-    highlight_set = set()
+    input_text = ""
+
+    search_button = pygame.Rect(10, 50, 120, 40)
 
     search_path = []
     search_index = 0
-    searching = False
+    search_active = False
+    search_timer = 0
+    search_target = None
 
-    search_value = 60
+    highlight_set = set()
 
     running = True
+
+
+    def start_search():
+
+        nonlocal search_path, search_index, search_active, search_timer, search_target, highlight_set, input_text
+
+        if input_text.isdigit():
+
+            val = int(input_text)
+
+            search_target = val
+            search_path = bst.search(val)
+
+            search_index = 0
+            search_timer = 0
+            search_active = True
+            highlight_set = set()
+
+            input_text = ""
 
 
     while running:
 
         screen.fill((240, 240, 240))
 
-        draw_tree(bst.root, WIDTH // 2, 80, 150, highlight_set)
+        draw_tree(bst.root, WIDTH // 2, 130, 150, highlight_set)
 
-        info = font.render(
-            "I=Insert | O=In | P=Pre | T=Post | S=Search | D=Delete | ESC=Back",
+
+        bar = font.render(
+            "I=Insert | O=In | P=Pre | T=Post | D=Delete | ESC=Back",
             True,
             (0, 0, 0)
         )
-        screen.blit(info, (10, 10))
+        screen.blit(bar, (10, 10))
+
+        pygame.draw.rect(screen, (180, 180, 180), search_button)
+        screen.blit(font.render("SEARCH", True, (0, 0, 0)), (20, 60))
 
 
-        if traversal:
-            highlight_set = set(traversal[:index])
+        pygame.draw.rect(screen, (255, 255, 255), (140, 50, 150, 40))
+        pygame.draw.rect(screen, (0, 0, 0), (140, 50, 150, 40), 2)
 
-            index += 1
-            if index > len(traversal):
-                traversal = []
-                index = 0
+        screen.blit(font.render(input_text, True, (0, 0, 0)), (150, 60))
 
 
+        if search_active:
 
-        if searching and search_path:
-            highlight_set = set(search_path[:search_index])
+            search_timer += 1
 
-            search_index += 1
-            if search_index > len(search_path):
-                searching = False
+            if search_timer % 20 == 0:
+
+                if search_index < len(search_path):
+                    highlight_set = set(search_path[:search_index + 1])
+                    search_index += 1
+                else:
+                    search_active = False
+
 
         pygame.display.flip()
-
 
 
         for event in pygame.event.get():
@@ -189,37 +154,29 @@ def run(screen):
             if event.type == pygame.QUIT:
                 running = False
 
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+
+
+                if search_button.collidepoint(event.pos):
+                    start_search()
+
+
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_ESCAPE:
                     running = False
 
 
-                if event.key == pygame.K_i:
-                    bst.insert(10)
+                elif event.key == pygame.K_RETURN:
+                    start_search()
 
 
-                if event.key == pygame.K_o:
-                    traversal = bst.inorder()
-                    index = 0
+                elif event.key == pygame.K_BACKSPACE:
+                    input_text = input_text[:-1]
 
-                if event.key == pygame.K_p:
-                    traversal = bst.preorder()
-                    index = 0
+                else:
+                    input_text += event.unicode
 
 
-                if event.key == pygame.K_t:
-                    traversal = bst.postorder()
-                    index = 0
-
-
-                if event.key == pygame.K_s:
-                    search_path = bst.search(search_value)
-                    search_index = 0
-                    searching = True
-
-
-                if event.key == pygame.K_d:
-                    bst.root = bst.delete(bst.root, 20)
-
-        clock.tick(2)
+        clock.tick(30)
