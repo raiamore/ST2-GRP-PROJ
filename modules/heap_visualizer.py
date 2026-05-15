@@ -1,5 +1,4 @@
 import pygame
-import random
 from heap_logic import MinHeap
 
 WIDTH, HEIGHT = 800, 600
@@ -8,23 +7,34 @@ heap = MinHeap()
 
 processed_event = ""
 
+# USER INPUT
+typing_mode = False
+priority_input = ""
+task_input = ""
+input_stage = "priority"
+
 
 def draw_heap(screen):
 
     global processed_event
+    global typing_mode
+    global priority_input
+    global task_input
+    global input_stage
 
     FONT = pygame.font.SysFont(None, 30)
 
     screen.fill((25, 25, 35))
 
     title = FONT.render(
-        "SPACE = Add Event | ENTER = Process Event | ESC = Back",
+        "SPACE = Add Event | ENTER = Confirm | ESC = Back",
         True,
         (255, 255, 255)
     )
 
     screen.blit(title, (20, 20))
 
+    # SHOW PROCESSED EVENT
     if processed_event != "":
 
         processed_text = FONT.render(
@@ -35,6 +45,28 @@ def draw_heap(screen):
 
         screen.blit(processed_text, (20, 60))
 
+    # INPUT MODE
+    if typing_mode:
+
+        if input_stage == "priority":
+
+            input_text = FONT.render(
+                f"Enter Priority: {priority_input}",
+                True,
+                (255, 255, 0)
+            )
+
+        else:
+
+            input_text = FONT.render(
+                f"Enter Task Name: {task_input}",
+                True,
+                (255, 255, 0)
+            )
+
+        screen.blit(input_text, (20, 100))
+
+    # EMPTY HEAP
     if heap.is_empty():
 
         empty_text = FONT.render(
@@ -55,7 +87,12 @@ def draw_heap(screen):
             x = WIDTH // 2 + (i % 4) * 120 - 180
             y = 170 + (i // 4) * 120
 
-            pygame.draw.circle(screen, (100, 200, 255), (x, y), 40)
+            pygame.draw.circle(
+                screen,
+                (100, 200, 255),
+                (x, y),
+                40
+            )
 
             priority_text = FONT.render(
                 str(priority),
@@ -73,12 +110,20 @@ def draw_heap(screen):
 
             screen.blit(event_text, (x - 35, y + 45))
 
+            # CONNECT TO PARENT
             if i > 0:
 
                 parent = (i - 1) // 2
 
-                parent_x = WIDTH // 2 + (parent % 4) * 120 - 180
-                parent_y = 170 + (parent // 4) * 120
+                parent_x = (
+                    WIDTH // 2 +
+                    (parent % 4) * 120 - 180
+                )
+
+                parent_y = (
+                    170 +
+                    (parent // 4) * 120
+                )
 
                 pygame.draw.line(
                     screen,
@@ -94,6 +139,10 @@ def draw_heap(screen):
 def run(screen):
 
     global processed_event
+    global typing_mode
+    global priority_input
+    global task_input
+    global input_stage
 
     running = True
 
@@ -104,28 +153,94 @@ def run(screen):
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
+
                 pygame.quit()
+
                 return
 
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_SPACE:
+                # START INPUT MODE
+                if event.key == pygame.K_SPACE and not typing_mode:
 
-                    priority = random.randint(1, 99)
+                    typing_mode = True
 
-                    event_name = f"Task {chr(random.randint(65, 90))}"
+                    priority_input = ""
 
-                    heap.insert((priority, event_name))
+                    task_input = ""
 
-                elif event.key == pygame.K_RETURN:
+                    input_stage = "priority"
+
+                # PROCESS MIN EVENT
+                elif event.key == pygame.K_RETURN and not typing_mode:
 
                     removed = heap.extract_min()
 
                     if removed:
+
                         processed_event = (
-                            f"{removed[1]} (Priority {removed[0]})"
+                            f"{removed[1]} "
+                            f"(Priority {removed[0]})"
                         )
 
+                # EXIT
                 elif event.key == pygame.K_ESCAPE:
 
                     running = False
+
+                # HANDLE USER TYPING
+                elif typing_mode:
+
+                    # ENTER KEY
+                    if event.key == pygame.K_RETURN:
+
+                        # MOVE TO TASK INPUT
+                        if input_stage == "priority":
+
+                            if priority_input.isdigit():
+
+                                input_stage = "task"
+
+                        # FINALIZE INSERTION
+                        else:
+
+                            if task_input.strip() != "":
+
+                                heap.insert(
+                                    (
+                                        int(priority_input),
+                                        task_input
+                                    )
+                                )
+
+                            typing_mode = False
+
+                    # BACKSPACE
+                    elif event.key == pygame.K_BACKSPACE:
+
+                        if input_stage == "priority":
+
+                            priority_input = (
+                                priority_input[:-1]
+                            )
+
+                        else:
+
+                            task_input = (
+                                task_input[:-1]
+                            )
+
+                    # ONLY NUMBERS FOR PRIORITY
+                    else:
+
+                        if input_stage == "priority":
+
+                            if event.unicode.isdigit():
+
+                                priority_input += (
+                                    event.unicode
+                                )
+
+                        else:
+
+                            task_input += event.unicode
