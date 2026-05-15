@@ -148,6 +148,19 @@ def run(screen):
 
         pygame.display.flip()
 
+        if search_target is not None and not search_active:
+
+            if search_path and search_path[-1].value == search_target:
+                msg = big_font.render(f"FOUND: {search_target}", True, (0, 150, 0))
+            else:
+                msg = big_font.render("NOT FOUND", True, (200, 0, 0))
+
+            screen.blit(msg, (WIDTH // 2 - 80, 80))
+
+
+        pygame.display.flip()
+
+
 
         for event in pygame.event.get():
 
