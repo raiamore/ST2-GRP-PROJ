@@ -6,7 +6,6 @@ from modules import bst_visualizer
 from modules import sorting_visualizer
 from modules import linear_search_visualizer
 from modules import heap_visualizer
-from modules import pathfinding_visualizer
 from modules import graph_visualizer
 from modules import dp_visualizer
 
@@ -44,9 +43,8 @@ def draw_menu():
         "BST": pygame.Rect(100, 410, 260, 55),
 
         # RIGHT COLUMN
-        "Heap": pygame.Rect(440, 130, 260, 55),
 
-        "Puzzles": pygame.Rect(440, 200, 260, 55),
+        "Heap": pygame.Rect(440, 200, 260, 55),
 
         "Graphs": pygame.Rect(440, 270, 260, 55),
 
@@ -57,7 +55,12 @@ def draw_menu():
 
     for name, rect in buttons.items():
 
-        pygame.draw.rect(screen, (150, 150, 250), rect, border_radius=8)
+        pygame.draw.rect(
+            screen,
+            (150, 150, 250),
+            rect,
+            border_radius=8
+        )
 
         text = font.render(name, True, (0, 0, 0))
 
@@ -69,6 +72,7 @@ def draw_menu():
 
     return buttons
 
+
 running = True
 
 while running:
@@ -78,6 +82,7 @@ while running:
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
+
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -85,32 +90,37 @@ while running:
             pos = event.pos
 
             if buttons["Stack"].collidepoint(pos):
+
                 stack_visualizer.run(screen)
 
             elif buttons["Queue"].collidepoint(pos):
+
                 queue_visualizer.run(screen)
 
             elif buttons["Linked List"].collidepoint(pos):
+
                 linkedlist_visualizer.run(screen)
 
             elif buttons["BST"].collidepoint(pos):
+
                 bst_visualizer.run(screen)
 
             elif buttons["Sorting"].collidepoint(pos):
+
                 sorting_visualizer.run(screen)
 
-
             elif buttons["Heap"].collidepoint(pos):
+
                 heap_visualizer.run(screen)
 
-            elif buttons["Puzzles"].collidepoint(pos):
-                pathfinding_visualizer.run(screen)
-
             elif buttons["Graphs"].collidepoint(pos):
+
                 graph_visualizer.run(screen)
 
             elif buttons["DP"].collidepoint(pos):
+
                 dp_visualizer.run(screen)
 
     clock.tick(30)
+
 pygame.quit()
